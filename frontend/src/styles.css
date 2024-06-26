@@ -1,0 +1,131 @@
+/* src/styles.css */
+
+/* Default styles for mobile-first design */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+.container {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.round-summary {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.round-summary:hover {
+    background-color: #f0f0f0;
+}
+
+.card {
+    cursor: pointer;
+    margin-bottom: 20px;
+    /* Ensure there's space between cards */
+    border: 1px solid #ddd;
+    /* Add border to the card */
+    padding: 15px;
+    /* Add padding inside the card */
+    border-radius: 10px;
+    /* Round the corners of the card */
+    background-color: #fff;
+    /* Ensure the card background is white */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add subtle shadow for depth */
+    transition: background-color 0.3s ease;
+    /* Smooth transition for hover effect */
+    position: relative;
+    /* For positioning the over par circle */
+}
+
+.card:hover {
+    background-color: #f9f9f9;
+    /* Slightly change background color on hover */
+}
+
+.card-title {
+    font-size: 1.5em;
+    /* Increase the font size of the card title */
+    font-weight: bold;
+    /* Make the card title bold */
+    margin-bottom: 5px;
+    /* Reduce space around the title */
+}
+
+.card-text {
+    margin: 0;
+    /* Remove margin to reduce space */
+}
+
+.over-par-circle {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: white;
+    border-radius: 50%;
+    padding: 10px 15px;
+    font-size: 1.5em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.over-par-circle.positive {
+    background-color: black;
+    /* Black for over par */
+}
+
+.over-par-circle.negative {
+    background-color: red;
+    /* Red for under par */
+}
+
+.btn-primary {
+    margin-top: 10px;
+}
+
+button,
+input,
+select,
+textarea {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Styles for larger screens */
+@media (min-width: 600px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.75em;
+    }
+
+    button {
+        width: auto;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: auto;
+    }
+}

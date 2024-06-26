@@ -1,0 +1,10 @@
+{
+    "name": "golf-training-app",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "concurrently \"cd backend && export FLASK_APP=app && flask run\" \"cd frontend && npm start\""
+    },
+    "devDependencies": {
+        "concurrently": "^6.0.0"
+    }
+}
