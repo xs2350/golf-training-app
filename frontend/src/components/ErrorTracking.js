@@ -8,35 +8,48 @@ const ErrorTracking = () => {
     const [rounds, setRounds] = useState([]);
     const [selectedRound, setSelectedRound] = useState(null);
     const [isAddingRound, setIsAddingRound] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:5001/rounds', { withCredentials: true })
-            .then(response => {
-                if (Array.isArray(response.data)) {
-                    // Sort the rounds by date in descending order
-                    const sortedRounds = response.data.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    setRounds(sortedRounds);
-                } else {
-                    setError('Unexpected response format');
-                }
-            })
-            .catch(error => {
+        const fetchRounds = async () => {
+            try {
+                const response = await axios.get('http://localhost:5001/rounds', { withCredentials: true });
+                setRounds(response.data || []);
+            } catch (error) {
                 console.error('Error fetching the rounds:', error);
-                setError(error.message);
-            });
-    }, []);
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRounds();
+    }, []);  // Ensure the dependency array is empty to run the effect only once
 
     const addRound = (newRound) => {
-        setRounds([newRound, ...rounds]);
+        setRounds(prevRounds => Array.isArray(prevRounds) ? [...prevRounds, newRound] : [newRound]);
     };
 
-    const deleteRound = (id) => {
-        setRounds(rounds.filter(round => round.id !== id));
+    const deleteRound = async (id) => {
+        try {
+            const response = await axios.delete(`http://localhost:5001/rounds/${id}`, { withCredentials: true });
+            if (response.status === 200) {
+                setRounds(prevRounds => prevRounds.filter(round => round.id !== id));
+            } else {
+                console.error('Error deleting the round:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting the round:', error);
+        }
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     if (error) {
-        return <div className="alert alert-danger">Error: {error}</div>;
+        return <div>Error loading rounds: {error.message}</div>;
     }
 
     return (
@@ -50,12 +63,12 @@ const ErrorTracking = () => {
                 <div>
                     <h2>Round Details</h2>
                     <p>Course: {selectedRound.course}</p>
-                    <p>Date: {new Date(selectedRound.date).toLocaleDateString('en-GB')}</p>
+                    <p>Date: {selectedRound.date}</p>
                     <p>Over Par: {selectedRound.overPar}</p>
                     <h2>Errors</h2>
                     <ul>
                         {selectedRound.errors.map((error, index) => (
-                            <li key={index}>{error.errorType} with {error.club}</li>
+                            <li key={index}>{error.errorType || error.customError} with {error.club}</li>
                         ))}
                     </ul>
                     <button onClick={() => setSelectedRound(null)}>Back to Rounds</button>
@@ -65,14 +78,18 @@ const ErrorTracking = () => {
                     <h1>All Rounds</h1>
                     <button onClick={() => setIsAddingRound(true)}>Enter New Round</button>
                     <div className="rounds-container">
-                        {rounds.map((round, index) => (
-                            <RoundSummary
-                                key={index}
-                                round={round}
-                                onClick={() => setSelectedRound(round)}
-                                onDelete={deleteRound}
-                            />
-                        ))}
+                        {rounds.length > 0 ? (
+                            rounds.map((round, index) => (
+                                <RoundSummary
+                                    key={index}
+                                    round={round}
+                                    onClick={() => setSelectedRound(round)}
+                                    onDelete={deleteRound}
+                                />
+                            ))
+                        ) : (
+                            <p>No rounds available</p>
+                        )}
                     </div>
                 </div>
             )}

@@ -4,15 +4,17 @@ import '../styles.css';
 
 const RoundEntry = ({ addRound, goBack }) => {
     const [round, setRound] = useState({ course: '', date: '', overPar: '', errors: [] });
-    const [errorLog, setErrorLog] = useState({ searchText: '', errorType: '', club: '' });
-    const [errorOptions, setErrorOptions] = useState([]);
+    const [errorLog, setErrorLog] = useState({ errorType: '', club: '', customError: '' });
     const [errorTypes, setErrorTypes] = useState([]);
+    const [clubOptions, setClubOptions] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState(false); // Add loading state
 
     useEffect(() => {
-        axios.get('http://localhost:5001/errors')
-            .then(response => setErrorTypes(response.data))
-            .catch(error => console.error('Error fetching the error types:', error));
+        // Fetch clubs from the backend
+        axios.get('http://localhost:5001/clubs')
+            .then(response => setClubOptions(response.data))
+            .catch(error => console.error('Error fetching the clubs:', error));
     }, []);
 
     const handleInputChange = (e) => {
@@ -24,15 +26,20 @@ const RoundEntry = ({ addRound, goBack }) => {
         const { name, value } = e.target;
         setErrorLog({ ...errorLog, [name]: value });
 
-        if (name === 'searchText') {
-            const filteredErrors = errorTypes.filter(error => error.type.toLowerCase().includes(value.toLowerCase()));
-            setErrorOptions(filteredErrors);
+        if (name === 'club') {
+            // Fetch errors based on selected club
+            axios.get(`http://localhost:5001/errors/${value}`)
+                .then(response => setErrorTypes(response.data))
+                .catch(error => console.error('Error fetching the error types:', error));
+            setErrorLog({ ...errorLog, errorType: '', customError: '', club: value });
         }
     };
 
     const logError = () => {
-        setRound({ ...round, errors: [...round.errors, errorLog] });
-        setErrorLog({ searchText: '', errorType: '', club: '' });
+        const selectedError = errorTypes.find(error => error.id == errorLog.errorType);
+        const selectedClub = clubOptions.find(club => club.id == errorLog.club);
+        setRound({ ...round, errors: [...round.errors, { errorType: selectedError ? selectedError.type : errorLog.customError, club: selectedClub ? selectedClub.name : 'Unknown' }] });
+        setErrorLog({ errorType: '', club: '', customError: '' });
     };
 
     const isValidDate = (dateString) => {
@@ -59,20 +66,22 @@ const RoundEntry = ({ addRound, goBack }) => {
         }
 
         console.log('Saving round:', round); // Debugging log
-        axios.post('http://localhost:5001/log-round', round, {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true
-        })
+        setLoading(true); // Set loading state to true
+        axios.post('http://localhost:5001/log-round', round, { withCredentials: true })
             .then(response => {
                 console.log('Response:', response); // Debugging log
                 alert('Round logged successfully!');
-                addRound(response.data);  // Ensure the added round includes the database ID
-                goBack();  // Navigate back to the round summary page
+                addRound(round); // Ensure the added round includes the database ID
+                goBack(); // Navigate back to the round summary page
                 setRound({ course: '', date: '', overPar: '', errors: [] });
-                setErrorMessage('');  // Clear error message
+                setErrorMessage(''); // Clear error message
             })
             .catch(error => {
                 console.error('Error logging the round:', error); // Debugging log
+                setErrorMessage('Error logging the round. Please try again.');
+            })
+            .finally(() => {
+                setLoading(false); // Set loading state to false
             });
     };
 
@@ -94,7 +103,7 @@ const RoundEntry = ({ addRound, goBack }) => {
                 placeholder="Date"
                 value={round.date}
                 onChange={handleInputChange}
-                max={new Date().toISOString().split("T")[0]}  // Set today as the max date
+                max={new Date().toISOString().split("T")[0]} // Set today as the max date
                 required
             />
             <input
@@ -106,31 +115,39 @@ const RoundEntry = ({ addRound, goBack }) => {
                 required
             />
             <h2>Log Errors</h2>
-            <input
-                type="text"
-                name="searchText"
-                placeholder="Search errors"
-                value={errorLog.searchText}
-                onChange={handleErrorInputChange}
-            />
-            <ul>
-                {errorOptions.map((error) => (
-                    <li key={error.id} onClick={() => setErrorLog({ ...errorLog, errorType: error.type, searchText: error.type })}>
-                        {error.type}
-                    </li>
-                ))}
-            </ul>
             <select
                 name="club"
                 value={errorLog.club}
                 onChange={handleErrorInputChange}
+                required
             >
                 <option value="">Select club</option>
-                <option value="Driver / Woods / Hybrids">Driver / Woods / Hybrids</option>
-                <option value="Irons">Irons</option>
-                <option value="Wedges">Wedges</option>
-                <option value="Putting">Putting</option>
+                {clubOptions.map((club) => (
+                    <option key={club.id} value={club.id}>{club.name}</option>
+                ))}
             </select>
+            <select
+                name="errorType"
+                value={errorLog.errorType}
+                onChange={handleErrorInputChange}
+                required
+            >
+                <option value="">Select error</option>
+                {errorTypes.map((error) => (
+                    <option key={error.id} value={error.id}>{error.type}</option>
+                ))}
+                <option value="Other">Other</option>
+            </select>
+            {errorLog.errorType === "Other" && (
+                <input
+                    type="text"
+                    name="customError"
+                    placeholder="Describe the error"
+                    value={errorLog.customError}
+                    onChange={handleErrorInputChange}
+                    required
+                />
+            )}
             <button onClick={logError}>Log Error</button>
             <h2>Errors Logged</h2>
             <ul>
@@ -138,7 +155,9 @@ const RoundEntry = ({ addRound, goBack }) => {
                     <li key={index}>{error.errorType} with {error.club}</li>
                 ))}
             </ul>
-            <button onClick={saveRound}>Save Round</button>
+            <button onClick={saveRound} disabled={loading}>
+                {loading ? 'Logging...' : 'Save Round'}
+            </button>
         </div>
     );
 };

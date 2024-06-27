@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 
 const RoundSummary = ({ round, onClick, onDelete }) => {
     const handleDelete = async (e) => {
@@ -7,14 +6,7 @@ const RoundSummary = ({ round, onClick, onDelete }) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this round?");
         if (confirmDelete) {
             try {
-                const response = await axios.delete(`http://localhost:5001/rounds/${round.id}`, {
-                    withCredentials: true
-                });
-                if (response.status === 200) {
-                    onDelete(round.id);
-                } else {
-                    console.error('Error deleting the round:', response.data.message);
-                }
+                await onDelete(round.id);
             } catch (error) {
                 console.error('Error deleting the round:', error);
             }
@@ -35,7 +27,15 @@ const RoundSummary = ({ round, onClick, onDelete }) => {
                 <div className={`over-par-circle ${round.overPar >= 0 ? 'positive' : 'negative'}`}>
                     {round.overPar >= 0 ? `+${round.overPar}` : round.overPar}
                 </div>
-                <button className="btn btn-danger" onClick={handleDelete}>Delete Round</button>
+                <button
+                    className="btn btn-danger"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleDelete(e);
+                    }}
+                >
+                    Delete Round
+                </button>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
-from .models import GolfRound, db
+from .models import GolfRound, db, Club, Error, ClubError
 import json
 
 main = Blueprint("main", __name__)
@@ -43,18 +43,20 @@ def track_errors():
 
 
 # Log a new error
-@main.route("/log-error", methods=["POST"])
+@main.route("/log-error", methods=["POST", "OPTIONS"])
 def log_error():
+    if request.method == "OPTIONS":
+        return jsonify({"message": "Preflight request successful"}), 200
     error_data = request.get_json()
-    print(
-        error_data
-    )  # For now, just print the error data to console (or store it in a file/database later)
+    print(error_data)
     return jsonify({"message": "Error logged"}), 201
 
 
-# Get error types
-@main.route("/errors", methods=["GET"])
-def get_errors():
+# Get predefined error types
+@main.route("/predefined-errors", methods=["GET", "OPTIONS"])
+def get_predefined_errors():
+    if request.method == "OPTIONS":
+        return jsonify({"message": "Preflight request successful"}), 200
     return jsonify(errors_db)
 
 
@@ -71,7 +73,6 @@ def get_rounds():
                     "id": round.id,
                     "course": round.course,
                     "date": round.date,
-                    "strokes": round.strokes,
                     "overPar": round.over_par,
                     "errors": json.loads(round.errors),
                 }
@@ -88,19 +89,20 @@ def get_rounds():
 def log_round():
     try:
         round_data = request.get_json()
+        print(f"Received round data: {round_data}")  # Debugging log
         new_round = GolfRound(
             course=round_data["course"],
             date=round_data["date"],
-            strokes=round_data["strokes"],
             over_par=round_data["overPar"],
             errors=json.dumps(round_data["errors"]),
             user_id=current_user.id,
         )
         db.session.add(new_round)
         db.session.commit()
+        print("Round logged successfully")  # Debugging log
         return jsonify({"message": "Round logged successfully"}), 201
     except Exception as e:
-        print(f"Error logging round: {str(e)}")
+        print(f"Error logging round: {str(e)}")  # Debugging log
         return jsonify({"message": "Error logging round"}), 500
 
 
@@ -117,3 +119,32 @@ def delete_round(id):
     db.session.delete(round_to_delete)
     db.session.commit()
     return jsonify({"message": "Round deleted successfully"}), 200
+
+
+# Get all clubs
+@main.route("/clubs", methods=["GET"])
+def get_clubs():
+    try:
+        clubs = Club.query.all()
+        club_list = [{"id": club.id, "name": club.name} for club in clubs]
+        return jsonify(club_list)
+    except Exception as e:
+        print(f"Error fetching clubs: {str(e)}")
+        return jsonify({"message": "Error fetching clubs"}), 500
+
+
+# Get error types for a specific club
+@main.route("/errors/<int:club_id>", methods=["GET"])
+def get_errors_by_club(club_id):
+    try:
+        club_errors = ClubError.query.filter_by(club_id=club_id).all()
+        error_ids = [ce.error_id for ce in club_errors]
+        errors = Error.query.filter(Error.id.in_(error_ids)).all()
+        error_list = [
+            {"id": error.id, "type": error.type, "description": error.description}
+            for error in errors
+        ]
+        return jsonify(error_list)
+    except Exception as e:
+        print(f"Error fetching errors: {str(e)}")
+        return jsonify({"message": "Error fetching errors"}), 500

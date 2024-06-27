@@ -4,120 +4,123 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 10px;
+    padding: 0;
     background-color: #f8f9fa;
+    color: #333;
 }
 
 .container {
-    padding: 10px;
+    padding: 20px;
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-top: 20px;
-}
-
-.round-summary {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    background-color: #fff;
-    cursor: pointer;
-}
-
-.round-summary:hover {
-    background-color: #f0f0f0;
+    max-width: 800px;
+    margin: auto;
 }
 
 .card {
-    cursor: pointer;
-    margin-bottom: 20px;
-    /* Ensure there's space between cards */
     border: 1px solid #ddd;
-    /* Add border to the card */
-    padding: 15px;
-    /* Add padding inside the card */
-    border-radius: 10px;
-    /* Round the corners of the card */
-    background-color: #fff;
-    /* Ensure the card background is white */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Add subtle shadow for depth */
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #f0f8ff;
+    cursor: pointer;
     transition: background-color 0.3s ease;
-    /* Smooth transition for hover effect */
-    position: relative;
-    /* For positioning the over par circle */
 }
 
 .card:hover {
-    background-color: #f9f9f9;
-    /* Slightly change background color on hover */
+    background-color: #e0ffe0;
+}
+
+.card-body {
+    position: relative;
 }
 
 .card-title {
     font-size: 1.5em;
-    /* Increase the font size of the card title */
-    font-weight: bold;
-    /* Make the card title bold */
-    margin-bottom: 5px;
-    /* Reduce space around the title */
+    margin-bottom: 10px;
+    color: #2e8b57;
+    /* Green color for titles */
 }
 
 .card-text {
-    margin: 0;
-    /* Remove margin to reduce space */
+    font-size: 1.1em;
 }
 
 .over-par-circle {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    color: white;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    padding: 10px 15px;
-    font-size: 1.5em;
-    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2em;
+    color: white;
+    background-color: green;
+    /* Default to green */
 }
 
 .over-par-circle.positive {
     background-color: black;
-    /* Black for over par */
 }
 
 .over-par-circle.negative {
     background-color: red;
-    /* Red for under par */
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
 }
 
 .btn-primary {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
     margin-top: 10px;
 }
 
-button,
-input,
-select,
-textarea {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    font-size: 1em;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
+.btn-primary:hover {
+    background-color: #4cae4c;
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+h1,
+h2 {
+    color: #2e8b57;
+    /* Green color for headings */
 }
 
 /* Styles for larger screens */
 @media (min-width: 600px) {
     h1 {
-        font-size: 2em;
+        font-size: 2.5em;
     }
 
     h2 {
-        font-size: 1.75em;
+        font-size: 2em;
     }
 
     button {
@@ -128,4 +131,25 @@ textarea {
         max-width: 600px;
         margin: auto;
     }
+}
+
+
+/* Additional styles for background image on the home screen */
+.home-background {
+    background-image: url('golf_course_1.jpg');
+    /* Add the path to your image */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    /* White background with some transparency */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
